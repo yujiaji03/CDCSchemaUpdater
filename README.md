@@ -1,0 +1,2 @@
+# CDCSchemaUpdater
+基于flinkCDC获取表schema结构变更

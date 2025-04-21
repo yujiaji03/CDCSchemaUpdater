@@ -1,38 +1,75 @@
-target/
-!.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
+# ================================
+# IntelliJ IDEA 和 Java 相关忽略规则
+# ================================
 
-### IntelliJ IDEA ###
-.idea/modules.xml
-.idea/jarRepositories.xml
-.idea/compiler.xml
-.idea/libraries/
-*.iws
+# 忽略 IDEA 的配置文件
+.idea/
+.idea
 *.iml
 *.ipr
+*.iws
 
-### Eclipse ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
+# 忽略编译生成的文件
+/target/
+/build/
+/out/
 
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
+# 忽略 Maven/Gradle 的本地仓库缓存
+/.mvn/
+.mvn/
+.m2/
+.gradle/
+/build/
 
-### VS Code ###
-.vscode/
+# 忽略日志文件
+*.log
+logs/
+*.log.*
 
-### Mac OS ###
+# 忽略临时文件
+*.tmp
+*.bak
+*.swp
+*~
+
+# 忽略操作系统生成的文件
 .DS_Store
+Thumbs.db
+
+# 忽略环境相关的文件
+.env
+.env.local
+*.env
+
+# 忽略敏感信息文件（如 API 密钥等）
+secrets.properties
+credentials.json
+
+# 忽略测试覆盖率报告
+/coverage/
+jacoco.exec
+
+# 忽略其他工具生成的文件
+/.settings/
+/.classpath
+/.project
+
+# 忽略本地开发相关文件
+local.properties
+
+# 忽略 JAR 和 CLASS 文件
+*.jar
+*.class
+
+# 忽略打包生成的文件
+*.war
+*.ear
+
+# 忽略依赖管理工具的缓存
+/node_modules/
+/bower_components/
+/vendor/
+
+# 忽略 IDE 其他插件的文件
+/.vscode/
+/.history/

@@ -3,8 +3,7 @@
 # ================================
 
 # 忽略 IDEA 的配置文件
-.idea/
-.idea
+/.idea/
 *.iml
 *.ipr
 *.iws
@@ -19,8 +18,6 @@
 .mvn/
 .m2/
 .gradle/
-/build/
-
 # 忽略日志文件
 *.log
 logs/

@@ -4,8 +4,9 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 public class Config {
     public static String MYSQL_HOST;
@@ -21,20 +22,25 @@ public class Config {
     }
 
     private static void loadFromJson() {
-        try (BufferedReader reader = new BufferedReader(new FileReader("D:\\eclipse\\workspace\\CDCSchemaUpdater\\src\\main\\java\\com\\cdcUp\\config.json"))) {
-            StringBuilder contentBuilder = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                contentBuilder.append(line);
+        try (InputStream inputStream = Config.class.getClassLoader().getResourceAsStream("config.json")) {
+            if (inputStream == null) {
+                throw new RuntimeException("Failed to find config.json in resources directory");
             }
-            String jsonContent = contentBuilder.toString();
-            JSONObject jsonObject = JSON.parseObject(jsonContent);
-            Config.MYSQL_HOST = jsonObject.getString("MYSQL_HOST");
-            Config.MYSQL_PORT = jsonObject.getIntValue("MYSQL_PORT");
-            Config.MYSQL_USERNAME = jsonObject.getString("MYSQL_USERNAME");
-            Config.MYSQL_PASSWORD = jsonObject.getString("MYSQL_PASSWORD");
-            Config.HIVE_METASTORE_THRIFT_URL = jsonObject.getString("HIVE_METASTORE_THRIFT_URL");
-            Config.HDFS_URL = jsonObject.getString("HDFS_URL");
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+                StringBuilder contentBuilder = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    contentBuilder.append(line);
+                }
+                String jsonContent = contentBuilder.toString();
+                JSONObject jsonObject = JSON.parseObject(jsonContent);
+                Config.MYSQL_HOST = jsonObject.getString("MYSQL_HOST");
+                Config.MYSQL_PORT = jsonObject.getIntValue("MYSQL_PORT");
+                Config.MYSQL_USERNAME = jsonObject.getString("MYSQL_USERNAME");
+                Config.MYSQL_PASSWORD = jsonObject.getString("MYSQL_PASSWORD");
+                Config.HIVE_METASTORE_THRIFT_URL = jsonObject.getString("HIVE_METASTORE_THRIFT_URL");
+                Config.HDFS_URL = jsonObject.getString("HDFS_URL");
+            }
         } catch (IOException e) {
             throw new RuntimeException("Failed to load configuration from JSON file", e);
         }

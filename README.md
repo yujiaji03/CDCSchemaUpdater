@@ -9,7 +9,7 @@ CDCSchemaUpdater 是一个用于读取 MySQL binlog 中表结构变更的工具�
 ## 配置用法
 
 以下是json配置文件的介绍
-
+```json
 {
 "MYSQL_HOST": "你的Mysql地址",
 "MYSQL_PORT": 你的Mysql端口,
@@ -18,9 +18,9 @@ CDCSchemaUpdater 是一个用于读取 MySQL binlog 中表结构变更的工具�
 "HIVE_METASTORE_THRIFT_URL": "你的Hive Metastore Thrift URL",
 "HDFS_URL": "你的HDFS地址"
 }
-
+```
 以下是一个典型的配置文件示例：
-
+```json
 {
 "MYSQL_HOST": "192.168.1.1",
 "MYSQL_PORT": 3306,
@@ -29,3 +29,4 @@ CDCSchemaUpdater 是一个用于读取 MySQL binlog 中表结构变更的工具�
 "HIVE_METASTORE_THRIFT_URL": "thrift://192.168.1.1:9083",
 "HDFS_URL": "hdfs:///user/hive/warehouse"
 }
+```

@@ -22,7 +22,7 @@
 *.log
 logs/
 *.log.*
-
+/log
 # 忽略临时文件
 *.tmp
 *.bak

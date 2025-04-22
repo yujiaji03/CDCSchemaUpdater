@@ -1,9 +1,13 @@
 package com.cdcUp;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class SchemaChangeHandler {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SchemaChangeHandler.class);
     public static void parseAlterTable(String sql) {
         // 定义正则表达式模式，使关键字大小写不敏感
         Pattern modifyPattern = Pattern.compile("ALTER\\s+TABLE\\s+(\\S+)\\s+MODIFY\\s+COLUMN\\s+(\\S+)\\s+(\\S+)(?:\\s+CHARACTER\\s+SET\\s+\\S+)?(?:\\s+COLLATE\\s+\\S+)?(?:\\s+NULL)?(?:\\s+COMMENT\\s+'(.*?)')?", Pattern.CASE_INSENSITIVE);
@@ -14,14 +18,14 @@ public class SchemaChangeHandler {
         // 匹配 MODIFY COLUMN
         Matcher modifyMatcher = modifyPattern.matcher(sql);
         if (modifyMatcher(modifyMatcher)) {
-            System.out.println("结构修改完成");
+            LOGGER.info("表注释修改完成");
             return;
         }
 
         // 匹配 ADD COLUMN
         Matcher addMatcher = addPattern.matcher(sql);
         if (addMatcher(addMatcher)) {
-            System.out.println("添加列完成");
+            LOGGER.info("添加列完成");
             return;
         }
 
@@ -29,7 +33,7 @@ public class SchemaChangeHandler {
         // 匹配 DROP COLUMN
         Matcher dropMatcher = dropPattern.matcher(sql);
         if (dropMatcher(dropMatcher)) {
-            System.out.println("删除列完成");
+            LOGGER.info("删除列完成");
             return;
         }
 
@@ -37,12 +41,12 @@ public class SchemaChangeHandler {
         // 匹配 CHANGE COLUMN
         Matcher changeMatcher = changePattern.matcher(sql);
         if (changeMatcher(changeMatcher)) {
-            System.out.println("列重命名完成");
+            LOGGER.info("列重命名完成");
             return;
         }
 
         // 如果未匹配到任何类型
-        System.out.println("无法解析的 ALTER TABLE 语句: " + sql);
+        LOGGER.error("无法解析的 ALTER TABLE 语句: {}", sql);
     }
 
     private static boolean changeMatcher(Matcher changeMatcher) {
@@ -62,28 +66,28 @@ public class SchemaChangeHandler {
                 tableName = parts[1];
             }
 
-            System.out.println("ALTER TABLE 类型: CHANGE COLUMN");
-            System.out.println("库名: " + databaseName);
-            System.out.println("表名: " + tableName);
-            System.out.println("旧列名: " + oldColumnName);
-            System.out.println("新列名: " + newColumnName);
+            LOGGER.info("ALTER TABLE 类型: CHANGE COLUMN");
+            LOGGER.info("库名: {}", databaseName);
+            LOGGER.info("表名: {}", tableName);
+            LOGGER.info("旧列名: {}", oldColumnName);
+            LOGGER.info("新列名: {}", newColumnName);
 
             // 新建一个新表，结构为旧表的列去掉修改的列，并添加新列
             String newTableName = "tmp_" + tableName; // 新表名
             String createNewTableSql = String.format( //不完善，这个方法行不通
                     "CREATE TABLE hngs_hive_prd.%s AS SELECT * EXCEPT(%s), %s %s FROM hngs_hive_prd.%s", "ods_" + databaseName + "_" + newTableName + "_df", oldColumnName, newColumnName, convertToSparkType(columnType), "ods_" + databaseName + "_" + tableName + "_df");
-            System.out.println("生成的创建新表 SQL: " + createNewTableSql);
+            LOGGER.info("生成的创建新表 SQL: {}", createNewTableSql);
 
             try {
 //  不完善              SparkSqlSubmit.executeSparkSql(createNewTableSql);
             } catch (Exception e) {
-                System.err.println("创建新表失败: " + e.getMessage());
+                LOGGER.error("创建新表失败: {}", e.getMessage());
                 return true;
             }
 
             // 数据迁移：将旧表的数据迁移到新表
             String migrateDataSql = String.format("INSERT INTO hngs_hive_prd.%s SELECT * FROM hngs_hive_prd.%s", "ods_" + databaseName + "_" + newTableName + "_df", "ods_" + databaseName + "_" + tableName + "_df");
-            System.out.println("生成的数据迁移 SQL: " + migrateDataSql);
+            LOGGER.info("生成的数据迁移 SQL: {}", migrateDataSql);
 
             try {
 //  不完善              SparkSqlSubmit.executeSparkSql(migrateDataSql);
@@ -95,18 +99,18 @@ public class SchemaChangeHandler {
             // 删除旧表
             String dropOldTableSql = String.format("DROP TABLE hngs_hive_prd.%s", "ods_" + databaseName + "_" + tableName + "_df");
 //   不完善
-            System.out.println("生成的删除旧表 SQL: " + dropOldTableSql);
+            LOGGER.info("生成的删除旧表 SQL: {}", dropOldTableSql);
 
             try {
 //                SparkSqlSubmit.executeSparkSql(dropOldTableSql);
             } catch (Exception e) {
-                System.err.println("删除旧表失败: " + e.getMessage());
+                LOGGER.error("删除旧表失败: {}", e.getMessage());
                 return true;
             }
 
             // 将新表改名为旧表名
             String renameNewTableSql = String.format("ALTER TABLE hngs_hive_prd.%s RENAME TO hngs_hive_prd.%s", "ods_" + databaseName + "_" + newTableName + "_df", "ods_" + databaseName + "_" + tableName + "_df");
-            System.out.println("生成的重命名新表 SQL: " + renameNewTableSql);
+            LOGGER.info("生成的重命名新表 SQL: {}", renameNewTableSql);
 
             try {
 //  不完善              SparkSqlSubmit.executeSparkSql(renameNewTableSql);
@@ -124,13 +128,13 @@ public class SchemaChangeHandler {
         if (dropMatcher.find()) {
             String tableName = dropMatcher.group(1);
             String columnName = dropMatcher.group(2);
-            System.out.println("ALTER TABLE 类型: DROP COLUMN");
-            System.out.println("删除的列名: " + columnName);
+            LOGGER.info("ALTER TABLE 类型: DROP COLUMN");
+            LOGGER.info("删除的列名: {}", columnName);
 
             // 生成 Spark SQL 语句
             String sparkSql = String.format("ALTER TABLE %s DROP COLUMN %s", tableName, columnName);
 //            不完善
-            System.out.println("生成的 Spark SQL: " + sparkSql);
+            LOGGER.info("生成的 Spark SQL: {}", sparkSql);
             return true;
         }
         return false;
@@ -149,11 +153,11 @@ public class SchemaChangeHandler {
                 databaseName = parts[0];
                 tableName = parts[1];
             }
-            System.out.println("ALTER TABLE 类型: ADD COLUMN");
+            LOGGER.info("ALTER TABLE 类型: ADD COLUMN");
 
             // 生成 Spark SQL 语句
             String sparkSql = String.format("ALTER TABLE hngs_hive_prd.%s ADD COLUMNS (%s %s COMMENT '%s') ", "ods_" + databaseName + "_" + tableName + "_df", columnName, convertToSparkType(columnType), comment);
-            System.out.println("生成的 Spark SQL: " + sparkSql);
+            LOGGER.info("生成的 Spark SQL: {}", sparkSql);
             SparkSqlSubmit.executeSparkSql(sparkSql);
             return true;
         }
@@ -176,18 +180,18 @@ public class SchemaChangeHandler {
                 tableName = parts[1];
             }
 
-            System.out.println("ALTER TABLE 类型: MODIFY COLUMN");
-            System.out.println("库名: " + databaseName);
-            System.out.println("表名: " + tableName);
-            System.out.println("列名: " + columnName);
-            System.out.println("字段类型: " + columnType);
+            LOGGER.info("ALTER TABLE 类型: MODIFY COLUMN");
+            LOGGER.info("库名: {}", databaseName);
+            LOGGER.info("表名: {}", tableName);
+            LOGGER.info("列名: {}", columnName);
+            LOGGER.info("字段类型: {}", columnType);
             if (comment != null && !comment.isEmpty()) {
-                System.out.println("列注释: " + comment);
+                LOGGER.info("列注释: {}", comment);
             }
 
             // 生成 Spark SQL 语句
             String sparkSql = String.format("ALTER TABLE hngs_hive_prd.%s CHANGE COLUMN %s %s %s COMMENT '%s' ", "ods_" + databaseName + "_" + tableName + "_df", columnName, columnName, convertToSparkType(columnType), comment);
-            System.out.println("生成的 Spark SQL: " + sparkSql);
+            LOGGER.info("生成的 Spark SQL: {}", sparkSql);
             SparkSqlSubmit.executeSparkSql(sparkSql);
             return true;
         }

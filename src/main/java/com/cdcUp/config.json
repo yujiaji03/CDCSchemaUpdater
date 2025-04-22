@@ -1,0 +1,8 @@
+{
+  "MYSQL_HOST": "192.168.10.163",
+  "MYSQL_PORT": 3306,
+  "MYSQL_USERNAME": "root",
+  "MYSQL_PASSWORD": "yujiaji2013",
+  "HIVE_METASTORE_THRIFT_URL": "thrift://hadoop102:9083",
+  "HDFS_URL": "hdfs:///user/hive/warehouse"
+}

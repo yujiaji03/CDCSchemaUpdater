@@ -12,7 +12,7 @@ CDCSchemaUpdater 是一个用于读取 MySQL binlog 中表结构变更的工具�
 ```json
 {
 "MYSQL_HOST": "你的Mysql地址",
-"MYSQL_PORT": 你的Mysql端口,
+"MYSQL_PORT": 3306,
 "MYSQL_USERNAME": "你的Mysql用户名",
 "MYSQL_PASSWORD": "你的Mysql密码",
 "HIVE_METASTORE_THRIFT_URL": "你的Hive Metastore Thrift URL",

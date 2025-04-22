@@ -31,7 +31,7 @@ CDCSchemaUpdater 是一个用于读取 MySQL binlog 中表结构变更的工具�
 }
 ```
 ## Quick Start
-1.Run `git clone https://github.com/yujiaji03/CDCSchemaUpdater.git`
-2.Run `cd CDCSchemaUpdater`
-3.修改`src/main/resources/config.json`下的配置文件
-4.可以打包或在项目中直接运行`main`方法
+1. Run `git clone https://github.com/yujiaji03/CDCSchemaUpdater.git`
+2. Run `cd CDCSchemaUpdater`
+3. 修改`src/main/resources/config.json`下的配置文件
+4. 可以打包或在项目中直接运行`main`方法
